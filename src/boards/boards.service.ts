@@ -1,50 +1,33 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { BoardStatus } from './board-status.enum';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Board } from './entities/board.entity';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-boards.dto';
 
 @Injectable()
 export class BoardsService {
-  constructor(
-    @InjectRepository(Board)
-    private boardsRepository: Repository<Board>,
-  ) {}
+    constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<Board[]> {
-    return this.boardsRepository.find();
-  }
+    async create(createBoardDto: CreateBoardDto) {
+        return this.prisma.board.create({
+            data: createBoardDto,
+        });
+    } 
 
-  async findById(id: number): Promise<Board> {
-    const board = await this.boardsRepository.findOneBy({ id });
-    if (!board) {
-      throw new NotFoundException(`Board with ID ${id} not found`);
+    async findAll() {
+        return this.prisma.board.findMany();
     }
-    return board;
-  }
 
-  async create(dto: CreateBoardDto): Promise<Board> {
-    const newBoard = this.boardsRepository.create({
-      title: dto.title,
-      description: dto.description,
-      status: dto.status || BoardStatus.OPEN,
-    });
-    await this.boardsRepository.save(newBoard);
-    return newBoard;
-  }
+    async findOne(id: string) {
+        return this.prisma.board.findUnique({
+            where: { id },
+        });
+    }
 
-  async update(id: number, dto: UpdateBoardDto) {
-    const board = await this.findById(id);
-    Object.assign(board, dto);
-    await this.boardsRepository.save(board);
-    return board;
-  }
+    async remove(id: string) {
+        return this.prisma.board.delete({
+            where: { id },
+        });
+    }
 
-  async delete(id: number): Promise<Board> {
-    const board = await this.findById(id);
-    await this.boardsRepository.remove(board);
-    return board;
-  }
+    
 }

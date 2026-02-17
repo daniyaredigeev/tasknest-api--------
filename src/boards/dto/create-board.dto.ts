@@ -5,7 +5,6 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { BoardStatus } from '../board-status.enum';
 
 export class CreateBoardDto {
   @IsNotEmpty({ message: 'Название доски обязательно' })
@@ -16,8 +15,5 @@ export class CreateBoardDto {
   @IsNotEmpty({ message: 'Описание доски обязательно' })
   @IsString()
   description: string;
-
-  @IsEnum(BoardStatus)
-  @IsOptional()
-  status?: BoardStatus;
 }
+
